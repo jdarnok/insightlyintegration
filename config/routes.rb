@@ -8,4 +8,5 @@ Rails.application.routes.draw do
             }
   resources :users
   resources :organisations, except: [:destroy]
+  get 'organisations/order/:id', controller: 'organisations', action: 'order', as: 'order'
 end

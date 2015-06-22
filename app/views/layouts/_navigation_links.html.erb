@@ -1,6 +1,12 @@
 <%# add navigation links to this file %>
 <% if user_signed_in? %>
   <li><%= link_to 'Edit account', edit_user_registration_path %></li>
+  <% if current_user.organisation.nil? %>
+  <li><%= link_to 'Create organisation', new_organisation_path %></li>
+  <% else %>
+  <li><%= link_to 'Edit organisation', edit_organisation_path(current_user.organisation.id) %></li>
+  <li><%= link_to 'Show organisation', organisation_path(current_user.organisation.id) %></li>
+  <% end %>
   <li><%= link_to 'Sign out', destroy_user_session_path, :method=>'delete' %></li>
 <% else %>
   <li><%= link_to 'Sign in', new_user_session_path %></li>

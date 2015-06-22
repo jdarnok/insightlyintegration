@@ -1,2 +1,23 @@
-%h1 Organisations#show
-%p Find me in app/views/organisations/show.html.haml
+%table.table.table-hover
+  %thead
+    %tr
+      %th Name
+      %th Phone
+      %th Email
+      %th Country
+      %th Address
+      %th City
+      %th State
+      %th Postcode
+      %th Action
+  %tbody
+    %tr
+      %td= @organisation.name
+      %td= @organisation.phone
+      %td= @organisation.email
+      %td= @organisation.country
+      %td= @organisation.address
+      %td= @organisation.city
+      %td= @organisation.state
+      %td= @organisation.postcode
+      %td= link_to "Order", order_path(id: @organisation.id)

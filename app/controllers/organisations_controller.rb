@@ -1,5 +1,5 @@
 class OrganisationsController < ApplicationController
-  before_action :set_organisation, only: [:show, :edit, :update]
+  before_action :set_organisation, only: [:show, :edit, :update, :order]
   before_action :authenticate_user!
   def index
   end
@@ -36,6 +36,10 @@ class OrganisationsController < ApplicationController
   end
 
   def show
+  end
+
+  def order
+    @organisation.insightly_update_order
   end
 
   def edit
