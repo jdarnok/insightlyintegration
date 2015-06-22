@@ -33,7 +33,7 @@ class RegistrationsController < Devise::RegistrationsController
     resource_updated = update_resource(resource, account_update_params)
     yield resource if block_given?
     if resource_updated
-
+      # user or order, other class will break devise
       self.resource.insightly_update
       if is_flashing_format?
         flash_key = update_needs_confirmation?(resource, prev_unconfirmed_email) ?

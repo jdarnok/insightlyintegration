@@ -11,7 +11,11 @@ class User < ActiveRecord::Base
       self.update_attributes(contact_id: contact.contact_id)
   end
   def insightly_update
+    begin
       Insightly2.client.update_contact(contact: insightly_payload(true))
+    rescue Insightly2::Errors::ClientError => e
+      self.insightly_create
+    end
   end
 
        private
@@ -37,11 +41,6 @@ class User < ActiveRecord::Base
     :STATE=> self.state,
     :POSTCODE=> self.postcode,
     :COUNTRY=> self.country}],
-  :links=>[],
-  :tags=>[],
-  :date_created_utc=> Time.zone.now.strftime("%Y-%m-%d %H:%M:%S"),
-  :date_updated_utc=>"2014-10-23 17:27:25"
-  # "contact_id"=>81126408
   }
   payload.merge!({:contact_id=> self.contact_id}) if update
   payload.merge!({:date_created_utc=> Time.zone.now.strftime("%Y-%m-%d %H:%M:%S")}) unless update

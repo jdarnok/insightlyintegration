@@ -8,6 +8,7 @@ class OrganisationsController < ApplicationController
     respond_to do |format|
       if @organisation.update(organisation_params)
         @organisation.insightly_update
+        
         format.html { redirect_to @organisation, notice: 'organisation was successfully updated.' }
         format.json { head :no_content }
       else
