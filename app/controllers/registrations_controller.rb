@@ -51,7 +51,6 @@ class RegistrationsController < Devise::RegistrationsController
       clean_up_passwords resource
       respond_with resource
     end
-    binding.pry
   end
 
 
