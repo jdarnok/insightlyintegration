@@ -14,7 +14,7 @@ class User < ActiveRecord::Base
     begin
       Insightly2.client.update_contact(contact: insightly_payload(true))
     rescue Insightly2::Errors::ClientError => e
-      self.insightly_create
+      self.insightly_create_user
     end
   end
 
