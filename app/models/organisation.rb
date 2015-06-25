@@ -5,23 +5,17 @@ class Organisation < ActiveRecord::Base
   def insightly_create
       Insightly2.client.insightly_create_organisation(self)
   end
+
   def insightly_update
-    begin
-      Insightly2.client.update_organisation(organisation: insightly_payload(true))
-    rescue Insightly2::Errors::ResourceNotFoundError => e
-      self.insightly_create
-    end
-  end
-
-  def insightly_update_order
-    begin
-    Insightly2.client.update_organisation(organisation: insightly_payload(true,true))
+    Insightly2.client.update_organisation(organisation: insightly_payload(true))
   rescue Insightly2::Errors::ResourceNotFoundError => e
-    self.insightly_create
-    Insightly2.client.update_organisation(organisation: insightly_payload(true,true))
-  end
+    insightly_create
   end
 
-
-
+  def insightly_update
+    Insightly2.client.update_organisation(organisation: insightly_payload(true, true))
+  rescue Insightly2::Errors::ResourceNotFoundError => e
+    insightly_create
+    Insightly2.client.update_organisation(organisation: insightly_payload(true, true))
+  end
 end

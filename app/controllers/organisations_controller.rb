@@ -39,7 +39,7 @@ class OrganisationsController < ApplicationController
   end
 
   def order
-    @organisation.insightly_update_order
+    @organisation.insightly_update
   end
 
   def edit
