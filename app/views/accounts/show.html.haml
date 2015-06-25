@@ -1,0 +1,39 @@
+%p#notice= notice
+
+%p
+  %b Phone:
+  = @account.phone
+  %p
+    %b Name:
+    = @account.name
+%p
+  %b Organisation:
+  = @account.organisation    
+%p
+  %b Email:
+  = @account.email
+%p
+  %b Website:
+  = @account.website
+%p
+  %b Address:
+  = @account.address
+%p
+  %b Address2:
+  = @account.address2
+%p
+  %b City:
+  = @account.city
+%p
+  %b State:
+  = @account.state
+%p
+  %b Postcode:
+  = @account.postcode
+%p
+  %b Country:
+  = @account.country
+
+= link_to 'Edit', edit_account_path(@account)
+\|
+= link_to 'Back', accounts_path

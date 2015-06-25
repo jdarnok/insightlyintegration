@@ -30,6 +30,7 @@ require 'insightly2/dsl/tasks'
 require 'insightly2/dsl/team_members'
 require 'insightly2/dsl/teams'
 require 'insightly2/dsl/users'
+require 'insightly2/dsl/wrapper'
 require 'insightly2/utils'
 
 module Insightly2
@@ -59,7 +60,7 @@ module Insightly2
     include TeamMembers
     include Teams
     include Users
+    include Wrapper
     include Utils
   end
 end
-

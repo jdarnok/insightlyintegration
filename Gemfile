@@ -28,6 +28,7 @@ group :development do
 end
 group :development, :test do
   gem 'pry-rails'
+  gem 'pry-nav'
   gem 'pry-rescue'
   gem 'rubocop'
 end
