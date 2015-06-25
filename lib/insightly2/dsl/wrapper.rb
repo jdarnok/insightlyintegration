@@ -77,7 +77,6 @@ module Insightly2
       insightly_organisation = Insightly2.client.get_organisations(domain: organisation.domain)
       insightly_organisation = insightly_organisation.select {|item| item["ORGANISATION_NAME"] == organisation.name }
       organisation.organisation_id = insightly_organisation[0]["ORGANISATION_ID"]
-        binding.pry
         Insightly2.client.update_organisation(organisation: insightly_organisation_payload(organisation, update: true))
     end
 
