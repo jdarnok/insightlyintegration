@@ -140,11 +140,11 @@ module Insightly2
           type: 'Email',
           subtype: '',
           label: 'Work',
-          detail: contact.email },
+          detail: contact.email.to_s },
         { type: 'Phone',
           subtype: '',
           label: 'Work',
-          detail: contact.phone }],
+          detail: contact.phone.to_s }],
       }
       payload.merge!(contact_id: contact.contact_id) if update
       payload.merge!(date_created_utc: Time.zone.now.strftime('%Y-%m-%d %H:%M:%S')) unless update
