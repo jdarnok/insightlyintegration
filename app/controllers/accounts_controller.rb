@@ -41,7 +41,18 @@ class AccountsController < ApplicationController
   # PATCH/PUT /accounts/1.json
   def update
     respond_to do |format|
-      if @account.update(account_params)
+      organisation_name = @account.organisation
+      organisation_email = @account.email
+
+      @account.assign_attributes( account_params )
+
+      if @account.valid?
+        if @account.name_changed? || @account.phone_changed? || @account.email_changed?
+          Insightly2.client.insightly_update_contact(contact: @account)
+        end
+        Insightly2.client.insightly_update_organisation(organisation: @account)
+        @account.save
+
         format.html { redirect_to @account, notice: 'Account was successfully updated.' }
         format.json { render :show, status: :ok, location: @account }
       else

@@ -6,22 +6,22 @@ module Insightly2
 
 
     def create_account(account)
-
-      insightly_create_contact(contact: build_contact(contact: account))
-      insightly_create_organisation(organisation: build_organisation(account))
+      insightly_create_contact(contact: account)
+      insightly_create_organisation(organisation: account)
     end
 
 
-    def build_contact(contact)
+    def build_contact(contact, insightly_id = nil)
       builder = OpenStruct.new
-      builder.first_name = contact[:contact].name.split(" ").first
-      builder.last_name = contact[:contact].name.split(" ").last
-      builder.phone = contact[:contact].phone
-      builder.email = contact[:contact].email
-      builder.contact_id
+      builder.first_name = contact.name.split(" ").first
+      builder.last_name = contact.name.split(" ").last
+      builder.phone = contact.phone
+      builder.email = contact.email
+      builder.id = contact.id unless contact.id.blank?
+      builder.contact_id = insightly_id unless insightly_id.blank?
       builder
     end
-    def build_organisation(organisation)
+    def build_organisation(organisation, insightly_id: nil)
       builder = OpenStruct.new
       builder.name = organisation.organisation
       builder.phone = organisation.phone
@@ -34,20 +34,24 @@ module Insightly2
       builder.postcode = organisation.postcode
       builder.country = organisation.country
       builder.domain
+      builder.organisation_id = insightly_id unless insightly_id.blank?
+      builder.id = organisation.id
       builder
     end
 
-
-
     def insightly_update_contact(contact: nil)
       fail ArgumentError, 'Contact cannot be blank' if contact.blank?
-      insightly_contact = Insightly2.client.get_contacts(email: contact.email)
-      contact.contact_id = insightly_contact[0]["CONTACT_ID"]
-      begin
+
+      contacts = Insightly2.client.get_contacts
+      contacts = contacts.reject{ |x|  x["CUSTOMFIELDS"][0].nil? }
+      pulled_account = contacts.reject {|x| x["CUSTOMFIELDS"].find { |key| key["FIELD_VALUE"] == contact.id }.blank? }
+
+      contact = build_contact(contact, pulled_account[0].contact_id)
+      # begin
         Insightly2.client.update_contact(contact: insightly_contact_payload(contact, update: true))
-      rescue Insightly2::Errors::ClientError => e
-        insightly_create_contact(contact: contact)
-      end
+      # rescue Insightly2::Errors::ClientError => e
+        # insightly_create_contact(contact: contact)
+      # end
     end
 
 
@@ -58,6 +62,8 @@ module Insightly2
     # @return [[Insightly2::Resources::Contact, false].
     def insightly_create_contact(contact: nil)
       fail ArgumentError, 'Contact cannot be blank' if contact.blank?
+      contact = build_contact(contact)
+
       # contact.first_name = contact.name,split(" ").last
       # contact.last_name = contact.
       Insightly2.client.create_contact(contact: insightly_contact_payload(contact))
@@ -66,22 +72,22 @@ module Insightly2
 
     def insightly_create_organisation(organisation: nil)
       fail ArgumentError, 'Organisation cannot be blank' if organisation.blank?
-
+      organisation = build_organisation(organisation)
+      binding.pry
       organisation.domain = organisation.email.split("@").last
       Insightly2.client.create_organisation(organisation: insightly_organisation_payload(organisation))
     end
 
     def insightly_update_organisation(organisation: nil)
       fail ArgumentError, 'Organisation cannot be blank' if organisation.blank?
+      organisations = Insightly2.client.get_organisations
+      organisations = organisations.reject{ |x|  x["CUSTOMFIELDS"][0].nil? }
+      pulled_organisation = organisations.reject {|x| x["CUSTOMFIELDS"].find { |key| key["FIELD_VALUE"] == organisation.id }.blank? }
+      pulled_organisation = pulled_organisation[0]
+      organisation = build_organisation(organisation, insightly_id: pulled_organisation.organisation_id )
       organisation.domain = organisation.email.split("@").last
-      insightly_organisation = Insightly2.client.get_organisations(domain: organisation.domain)
-      insightly_organisation = insightly_organisation.select {|item| item["ORGANISATION_NAME"] == organisation.name }
-      organisation.organisation_id = insightly_organisation[0]["ORGANISATION_ID"]
         Insightly2.client.update_organisation(organisation: insightly_organisation_payload(organisation, update: true))
     end
-
-
-
 
     def insightly_organisation_payload(organisation, update = false, order = false)
       payload = {
@@ -111,7 +117,6 @@ module Insightly2
            :label=>"Work",
            :detail=> organisation.domain}],
        }
-
        payload.merge!({:organisation_id=> organisation.organisation_id}) if update
        payload.merge!({:date_created_utc=> Time.zone.now.strftime("%Y-%m-%d %H:%M:%S")}) unless update
        payload.merge!({:date_updated_utc=>Time.zone.now.strftime("%Y-%m-%d %H:%M:%S")}) if update
@@ -119,15 +124,13 @@ module Insightly2
          :CUSTOM_FIELD_ID=> "ORGANISATION_FIELD_1",
          :FIELD_VALUE=> Time.zone.now.strftime("%Y-%m-%d")}
        ]}) if order
+       payload.merge!({:CUSTOMFIELDS=>[{
+         :CUSTOM_FIELD_ID=> "ORGANISATION_FIELD_2",
+         :FIELD_VALUE=> organisation.id }
+       ]})
        payload
 
     end
-
-
-
-
-
-
 
     def insightly_contact_payload(contact, update = false)
       payload = {
@@ -146,6 +149,10 @@ module Insightly2
       payload.merge!(contact_id: contact.contact_id) if update
       payload.merge!(date_created_utc: Time.zone.now.strftime('%Y-%m-%d %H:%M:%S')) unless update
       payload.merge!(date_updated_utc: Time.zone.now.strftime('%Y-%m-%d %H:%M:%S')) if update
+      payload.merge!({:CUSTOMFIELDS=>[{
+        :CUSTOM_FIELD_ID=> "CONTACT_FIELD_1",
+        :FIELD_VALUE=> contact.id }
+      ]})
       payload
     end
   end
