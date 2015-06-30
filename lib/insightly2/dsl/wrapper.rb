@@ -111,7 +111,7 @@ module Insightly2
       begin
         Insightly2.client.update_organisation(organisation: insightly_organisation_payload(builded_organisation, update: true))
       rescue Insightly2::Errors::ResourceNotFoundError => e
-        insightly_organisation = insightly_create_organisation(organisation: organisation)
+        insightly_organisation = insightly_create_organisation(organisation)
         organisation.update_attributes(insightly_organisation_id: insightly_organisation.organisation_id)
       end
     end
