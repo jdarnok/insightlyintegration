@@ -73,7 +73,7 @@ module Insightly2
       begin
         Insightly2.client.update_contact(contact: insightly_contact_payload(builded_contact, update: true))
       rescue Insightly2::Errors::ClientError => e
-        insightly_contact = insightly_create_contact(contact: contact)
+        insightly_contact = insightly_create_contact(contact)
         contact.update_attributes(insightly_contact_id: insightly_contact.contact_id)
       end
       # begin
