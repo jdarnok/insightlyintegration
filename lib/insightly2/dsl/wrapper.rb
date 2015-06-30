@@ -5,15 +5,59 @@ module Insightly2
   module DSL::Wrapper
 
 
-    def create_account(account)
-      contact = insightly_create_contact(contact: account)
-      account.update_attributes(insightly_contact_id: contact.contact_id)
-      organisation = insightly_create_organisation(organisation: account)
-      account.update_attributes(insightly_organisation_id: organisation.organisation_id)
-
+#this 2 methods break account model into smaller pieces for rest of the code
+#builder needs to be fetched with proper data. When there are differences in
+#account like 'mail' instead of 'email' just change the proper attribute in
+# account.object
+#@param [Account] Account model object
+    def build_contact(account)
+      builder = OpenStruct.new
+      builder.first_name = account.name.split(" ").first
+      builder.last_name = account.name.split(" ").last
+      builder.phone = account.phone
+      builder.email = account.email
+      builder.id = account.id unless account.id.blank?
+      builder.contact_id = account.insightly_contact_id unless account.insightly_contact_id.blank?
+      builder
+    end
+    def build_organisation(account)
+      builder = OpenStruct.new
+      builder.name = account.organisation
+      builder.phone = account.phone
+      builder.email = account.email
+      builder.website = account.website
+      builder.address = account.address.to_s + ' ' +
+      account.address2.to_s
+      builder.city = account.city
+      builder.state = account.state
+      builder.postcode = account.postcode
+      builder.country = account.country
+      builder.domain = account.email.split("@").last
+      builder.brick_mortar = account.brick_mortar #boolean
+      builder.online = account.online #boolean
+      builder.organisation_id = account.insightly_organisation_id unless account.insightly_organisation_id.blank?
+      builder.id = account.id
+      builder
     end
 
-    def make_order(organisation: nil)
+
+    #Creates and updates Account object
+    #@param [Account] Account model object
+    def create_account(account)
+      contact = insightly_create_contact(account)
+      account.update_attributes(insightly_contact_id: contact.contact_id)
+      organisation = insightly_create_organisation(account)
+      account.update_attributes(insightly_organisation_id: organisation.organisation_id)
+    end
+
+    #@param [Account] Account model object
+    def update_account(account)
+      insightly_update_contact(account)
+      insightly_update_organisation(account)
+    end
+
+    #@param [Account] Account model object
+    def make_order(organisation)
       fail ArgumentError, 'Organisation cannot be blank' if organisation.blank?
       builded_organisation = build_organisation(organisation)
 
@@ -21,36 +65,8 @@ module Insightly2
         Insightly2.client.update_organisation(organisation: insightly_organisation_payload(builded_organisation, true, true))
     end
 
-    def build_contact(contact)
-      builder = OpenStruct.new
-      builder.first_name = contact.name.split(" ").first
-      builder.last_name = contact.name.split(" ").last
-      builder.phone = contact.phone
-      builder.email = contact.email
-      builder.id = contact.id unless contact.id.blank?
-      builder.contact_id = contact.insightly_contact_id unless contact.insightly_contact_id.blank?
-      builder
-    end
-    def build_organisation(organisation)
-      builder = OpenStruct.new
-      builder.name = organisation.organisation
-      builder.phone = organisation.phone
-      builder.email = organisation.email
-      builder.website = organisation.website
-      builder.address = organisation.address.to_s + ' ' +
-      organisation.address2.to_s
-      builder.city = organisation.city
-      builder.state = organisation.state
-      builder.postcode = organisation.postcode
-      builder.country = organisation.country
-      builder.domain
-      builder.brick_mortar = organisation.brick_mortar
-      builder.organisation_id = organisation.insightly_organisation_id unless organisation.insightly_organisation_id.blank?
-      builder.id = organisation.id
-      builder
-    end
-
-    def insightly_update_contact(contact: nil)
+    #@param [Account] Account model object
+    def insightly_update_contact(contact)
       fail ArgumentError, 'Contact cannot be blank' if contact.blank?
 
       builded_contact = build_contact(contact)
@@ -72,7 +88,7 @@ module Insightly2
     # @param [Hash] contact The contact to create.
     # @raise [ArgumentError] If the method arguments are blank.
     # @return [[Insightly2::Resources::Contact, false].
-    def insightly_create_contact(contact: nil)
+    def insightly_create_contact(contact)
       fail ArgumentError, 'Contact cannot be blank' if contact.blank?
       contact = build_contact(contact)
 
@@ -82,29 +98,27 @@ module Insightly2
     end
 
 
-    def insightly_create_organisation(organisation: nil)
+    def insightly_create_organisation(organisation)
       fail ArgumentError, 'Organisation cannot be blank' if organisation.blank?
       organisation = build_organisation(organisation)
-
       organisation.domain = organisation.email.split("@").last
       Insightly2.client.create_organisation(organisation: insightly_organisation_payload(organisation))
     end
 
-    def insightly_update_organisation(organisation: nil)
+    def insightly_update_organisation(organisation)
       fail ArgumentError, 'Organisation cannot be blank' if organisation.blank?
       builded_organisation = build_organisation(organisation)
       begin
-        builded_organisation.domain = organisation.email.split("@").last
         Insightly2.client.update_organisation(organisation: insightly_organisation_payload(builded_organisation, update: true))
       rescue Insightly2::Errors::ResourceNotFoundError => e
         insightly_organisation = insightly_create_organisation(organisation: organisation)
         organisation.update_attributes(insightly_organisation_id: insightly_organisation.organisation_id)
       end
-      # organisations = Insightly2.client.get_organisations
-      # organisations = organisations.reject{ |x|  x["CUSTOMFIELDS"][0].nil? }
-      # pulled_organisation = organisations.reject {|x| x["CUSTOMFIELDS"].find { |key| key["FIELD_VALUE"] == organisation.id }.blank? }
-      # pulled_organisation = pulled_organisation[0]
     end
+
+
+
+#proper hash for Insightly2 gem
 
     def insightly_organisation_payload(organisation, update = false, order = false)
       payload = {
@@ -138,7 +152,6 @@ module Insightly2
        payload.merge!({:date_created_utc=> Time.zone.now.strftime("%Y-%m-%d %H:%M:%S")}) unless update
        payload.merge!({:date_updated_utc=>Time.zone.now.strftime("%Y-%m-%d %H:%M:%S")}) if update
        payload.merge!({:CUSTOMFIELDS=>[]})
-       binding.pry
        if order
          hash = {
            :CUSTOM_FIELD_ID=> "ORGANISATION_FIELD_1",
@@ -164,6 +177,21 @@ module Insightly2
 
          payload[:CUSTOMFIELDS] << hash
       end
+
+      if organisation.online
+        hash = {
+           :CUSTOM_FIELD_ID=> "ORGANISATION_FIELD_4",
+           :FIELD_VALUE=> "True" }
+
+         payload[:CUSTOMFIELDS] << hash
+      else
+        hash = {
+           :CUSTOM_FIELD_ID=> "ORGANISATION_FIELD_4",
+           :FIELD_VALUE=> "Unchecked" }
+
+         payload[:CUSTOMFIELDS] << hash
+      end
+
 
        payload
 

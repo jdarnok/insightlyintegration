@@ -47,10 +47,9 @@ class AccountsController < ApplicationController
       @account.assign_attributes( account_params )
 
       if @account.valid?
-        if @account.name_changed? || @account.phone_changed? || @account.email_changed?
-          Insightly2.client.insightly_update_contact(contact: @account)
-        end
-        Insightly2.client.insightly_update_organisation(organisation: @account)
+        # Insightly2.client.insightly_update_contact(contact: @account)
+        # Insightly2.client.insightly_update_organisation(organisation: @account)
+        Insightly2.client.update_account(@account)
         @account.save
 
         format.html { redirect_to @account, notice: 'Account was successfully updated.' }
@@ -80,6 +79,6 @@ class AccountsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def account_params
-      params.require(:account).permit(:phone, :name, :organisation, :email, :website, :address, :address2, :city, :state, :postcode, :country)
+      params.require(:account).permit(:brick_mortar, :online, :phone, :name, :organisation, :email, :website, :address, :address2, :city, :state, :postcode, :country)
     end
 end
