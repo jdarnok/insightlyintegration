@@ -14,6 +14,8 @@
       %th Country
       %th organisation
       %th Name
+      %th Brick&Mortar
+      %th Online
       %th
       %th
       %th
@@ -32,6 +34,8 @@
         %td= account.country
         %td= account.organisation
         %td= account.name
+        %td= account.brick_mortar
+        %td= account.online
         %td= link_to 'Show', account
         %td= link_to 'Edit', edit_account_path(account)
         %td= link_to 'Destroy', account, :method => :delete, :data => { :confirm => 'Are you sure?' }

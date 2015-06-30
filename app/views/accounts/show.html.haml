@@ -40,6 +40,14 @@
   %b Name:
   = @account.name
 
+%p
+  %b Bricks & mortar:
+  = @account.brick_mortar
+
+%p
+  %b Online shop:
+  = @account.online
+
 = link_to 'Edit', edit_account_path(@account)
 \|
 = link_to 'Back', accounts_path
