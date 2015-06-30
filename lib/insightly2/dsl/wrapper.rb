@@ -184,6 +184,10 @@ module Insightly2
       else
         hash = {
           CUSTOM_FIELD_ID: @@organisation_online_shop_field,
+          #this is invalid, but by that it is shown on insightly page
+          #as unchecked
+          #when you change it to 'False' then that field will be invisible
+          #on Insightly
           FIELD_VALUE: 'Unchecked' }
 
         payload[:CUSTOMFIELDS] << hash
