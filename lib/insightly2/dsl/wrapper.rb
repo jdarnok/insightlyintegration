@@ -3,6 +3,14 @@ require 'active_record'
 
 module Insightly2
   module DSL::Wrapper
+
+    @@contact_colette_field = 'CONTACT_FIELD_1'
+    @@organisation_last_order_date_field = 'ORGANISATION_FIELD_1'
+    @@organisation_collete_account_id_field = 'ORGANISATION_FIELD_2'
+    @@organisation_brick_mortar_field = 'ORGANISATION_FIELD_3'
+    @@organisation_online_shop_field = 'ORGANISATION_FIELD_4'
+
+
     # Creates and updates Account object
     # @param [Account] Account model object
     def create_account(account)
@@ -143,25 +151,25 @@ module Insightly2
       payload.merge!(CUSTOMFIELDS: [])
       if order
         hash = {
-          CUSTOM_FIELD_ID: 'ORGANISATION_FIELD_1',
+          CUSTOM_FIELD_ID: @@organisation_last_order_date_field,
           FIELD_VALUE: Time.zone.now.strftime('%Y-%m-%d') }
 
         payload[:CUSTOMFIELDS] << hash
      end
       hash = {
-        CUSTOM_FIELD_ID: 'ORGANISATION_FIELD_2',
+        CUSTOM_FIELD_ID: @@organisation_collete_account_id_field,
         FIELD_VALUE: organisation.id }
 
       payload[:CUSTOMFIELDS] << hash
       if organisation.brick_mortar
         hash = {
-          CUSTOM_FIELD_ID: 'ORGANISATION_FIELD_3',
+          CUSTOM_FIELD_ID: @@organisation_brick_mortar_field,
           FIELD_VALUE: 'True' }
 
         payload[:CUSTOMFIELDS] << hash
       else
         hash = {
-          CUSTOM_FIELD_ID: 'ORGANISATION_FIELD_3',
+          CUSTOM_FIELD_ID: @@organisation_brick_mortar_field,
           FIELD_VALUE: 'Unchecked' }
 
         payload[:CUSTOMFIELDS] << hash
@@ -169,13 +177,13 @@ module Insightly2
 
       if organisation.online
         hash = {
-          CUSTOM_FIELD_ID: 'ORGANISATION_FIELD_4',
+          CUSTOM_FIELD_ID: @@organisation_online_shop_field,
           FIELD_VALUE: 'True' }
 
         payload[:CUSTOMFIELDS] << hash
       else
         hash = {
-          CUSTOM_FIELD_ID: 'ORGANISATION_FIELD_4',
+          CUSTOM_FIELD_ID: @@organisation_online_shop_field,
           FIELD_VALUE: 'Unchecked' }
 
         payload[:CUSTOMFIELDS] << hash
@@ -202,12 +210,10 @@ module Insightly2
       payload.merge!(date_created_utc: Time.zone.now.strftime('%Y-%m-%d %H:%M:%S')) unless update
       payload.merge!(date_updated_utc: Time.zone.now.strftime('%Y-%m-%d %H:%M:%S')) if update
       payload.merge!(CUSTOMFIELDS: [{
-                       CUSTOM_FIELD_ID: 'CONTACT_FIELD_1',
+                       CUSTOM_FIELD_ID: @@contact_colette_field,
                        FIELD_VALUE: contact.id }
                                    ])
       payload
     end
   end
 end
-
-# contact.select {|organisation| organisation["ORGANISATION_NAME"] == "druga" }
