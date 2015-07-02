@@ -49,7 +49,7 @@ class AccountsController < ApplicationController
       if @account.valid?
         # Insightly2.client.insightly_update_contact(contact: @account)
         # Insightly2.client.insightly_update_organisation(organisation: @account)
-        Insightly2.client.update_account(@account)
+        InsightlyWrapper.update_account(@account)
         @account.save
 
         format.html { redirect_to @account, notice: 'Account was successfully updated.' }

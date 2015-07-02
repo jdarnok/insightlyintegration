@@ -1,3 +1,11 @@
+GIT
+  remote: https://github.com/kennwilson/insightly-ruby
+  revision: c59868077e9ccf7a2a80361df2f15f3c659e63b9
+  specs:
+    insightly2 (0.1.8)
+      activesupport
+      faraday
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -238,9 +246,9 @@ DEPENDENCIES
   coffee-rails (~> 4.1.0)
   country_select
   devise
-  faraday
   haml-rails
   html2haml
+  insightly2!
   jbuilder (~> 2.0)
   jquery-rails
   pg
