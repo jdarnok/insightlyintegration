@@ -165,6 +165,43 @@ class InsightlyWrapper
        payload
      end
 
+     # this 2 methods break account model into smaller pieces for rest of the code
+     # builder needs to be fetched with proper data. When there are differences in
+     # account like 'mail' instead of 'email' just change the proper attribute in
+     # account.object
+     # @param [Account] Account model object
+     def self.build_contact(account)
+       builder = OpenStruct.new
+       builder.first_name = account.name.split(' ').first
+       builder.last_name = account.name.split(' ').last
+       builder.phone = account.phone
+       builder.email = account.email
+       #this id is for collete custom field
+       builder.id = account.id unless account.id.blank?
+       builder.contact_id = account.insightly_contact_id unless account.insightly_contact_id.blank?
+       builder
+     end
+
+     def self.build_organisation(account)
+       builder = OpenStruct.new
+       builder.name = account.organisation
+       builder.phone = account.phone
+       builder.email = account.email
+       builder.website = account.website
+       builder.address = account.address.to_s + ' ' +
+                         account.address2.to_s
+       builder.city = account.city
+       builder.state = account.state
+       builder.postcode = account.postcode
+       builder.country = account.country
+       builder.domain = account.email.split('@').last
+       builder.brick_mortar = account.brick_mortar # boolean
+       builder.online = account.online # boolean
+       builder.organisation_id = account.insightly_organisation_id unless account.insightly_organisation_id.blank?
+       builder.id = account.id
+       builder
+     end
+     
      def self.insightly_contact_payload(contact, update = false)
        payload = {
          first_name: contact.first_name,
@@ -190,42 +227,7 @@ class InsightlyWrapper
      end
 
 
-     private
-     # this 2 methods break account model into smaller pieces for rest of the code
-     # builder needs to be fetched with proper data. When there are differences in
-     # account like 'mail' instead of 'email' just change the proper attribute in
-     # account.object
-     # @param [Account] Account model object
-     def self.build_contact(account)
-       builder = OpenStruct.new
-       builder.first_name = account.name.split(' ').first
-       builder.last_name = account.name.split(' ').last
-       builder.phone = account.phone
-       builder.email = account.email
-       builder.id = account.id unless account.id.blank?
-       builder.contact_id = account.insightly_contact_id unless account.insightly_contact_id.blank?
-       builder
-     end
 
-     def self.build_organisation(account)
-       builder = OpenStruct.new
-       builder.name = account.organisation
-       builder.phone = account.phone
-       builder.email = account.email
-       builder.website = account.website
-       builder.address = account.address.to_s + ' ' +
-                         account.address2.to_s
-       builder.city = account.city
-       builder.state = account.state
-       builder.postcode = account.postcode
-       builder.country = account.country
-       builder.domain = account.email.split('@').last
-       builder.brick_mortar = account.brick_mortar # boolean
-       builder.online = account.online # boolean
-       builder.organisation_id = account.insightly_organisation_id unless account.insightly_organisation_id.blank?
-       builder.id = account.id
-       builder
-     end
 
 
 end
